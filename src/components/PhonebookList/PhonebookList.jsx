@@ -1,12 +1,33 @@
-import PropTypes from 'prop-types';
+import { useSelector } from 'react-redux';
+
+import { useDispatch } from 'react-redux';
+import { deleteContact } from 'redux/contacts/contacts-slice';
 
 import styles from './phonebook-list.module.css';
 
-const PhonebookList = ({ removeContact, contacts }) => {
-  const contact = contacts.map(({ id, name, number }) => (
+const PhonebookList = () => {
+  const contacts = useSelector(store => store.contacts);
+  const filter = useSelector(store => store.filter);
+
+  const dispatch = useDispatch();
+
+  const handleDeleteContact = id => {
+    const action = deleteContact(id);
+    dispatch(action);
+  };
+
+  const filterContacts = () => {
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filter.toLowerCase())
+    );
+  };
+
+  const listContactsByFilter = filterContacts();
+
+  const contact = listContactsByFilter.map(({ id, name, number }) => (
     <li key={id}>
       {name}: {number}
-      <button onClick={() => removeContact(id)} className={styles.btn}>
+      <button onClick={() => handleDeleteContact(id)} className={styles.btn}>
         Delete
       </button>
     </li>
@@ -15,18 +36,3 @@ const PhonebookList = ({ removeContact, contacts }) => {
 };
 
 export default PhonebookList;
-
-PhonebookList.defaultProps = {
-  contacts: [],
-};
-
-PhonebookList.propTypes = {
-  removeContact: PropTypes.func.isRequired,
-  contacts: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      number: PropTypes.string.isRequired,
-    })
-  ),
-};
